@@ -1,0 +1,13 @@
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      Events:
+        MyApi:
+          Type: Api
+          Properties:
+            Path: /yourAPI
+            Method: POST

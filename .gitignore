@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+lambda2.py
+
+# Virtual Environment
+env/
+
+# Build artifacts
+*.aws-sam/
+*.zip
+
+# Local development
+.vscode/
