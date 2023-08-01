@@ -1,9 +1,37 @@
 import http.client
 import json
 
+EXTERNAL_API_ENDPOINT = "YOUR-EXTERNAL-API-ENDPOINT-WITHOUT-HTTP"
+
+def send_external_api_request(query):
+    # Prepare the request data
+    payload = json.dumps({"query": query})
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    # Send the request to the external API
+    conn = http.client.HTTPSConnection(EXTERNAL_API_ENDPOINT)
+    conn.request("POST", "/", payload, headers)
+    response = conn.getresponse()
+
+    # Read and return the response data
+    response_data = response.read().decode()
+    conn.close()
+    return response_data
+
+def parse_response(response_data):
+    # Parse the JSON response data
+    try:
+        parsed_response = json.loads(response_data)
+        return parsed_response
+    except json.JSONDecodeError as e:
+        print("Error decoding JSON response:", e)
+        return None
+
 def lambda_handler(event, context):
     try:
-        print('Received event:', event)
+        #print('Received event:', event)
 
         # Extract the request body from the event (assuming it's a JSON object)
         body = event.get('body')
@@ -14,30 +42,25 @@ def lambda_handler(event, context):
 
             # Process the query (You can add your own logic here)
             if query:
-                # Make the API request
-                connection = http.client.HTTPSConnection("API_endpoint_to_forward_to")
-                headers = {'Content-type': 'application/json'}
-                data = json.dumps({"query": query})
-                connection.request("POST", "/", data, headers)
-                
-                # Get the response from the API
-                response = connection.getresponse()
-                result = response.read().decode()
+                # Send the query to the external API
+                response_data = send_external_api_request(query)
 
-                # Close the connection
-                connection.close()
+                # Parse the response from the external API
+                parsed_response = parse_response(response_data)
 
-                # Parse the response from the API
-                response_data = json.loads(result)
+                if parsed_response:
+                    result = {'message': f'Query received: {query}', 'external_api_response': parsed_response}
+                else:
+                    result = {'message': 'Error processing response from the external API'}
             else:
-                response_data = {'error': 'No query found in the request'}
+                result = {'message': 'No query found in the request'}
         else:
-            response_data = {'error': 'No request body found'}
+            result = {'message': 'No request body found'}
 
         # Construct the response for API Gateway
         response = {
             'statusCode': 200,
-            'body': json.dumps(response_data)
+            'body': json.dumps(result)
         }
 
         print('Response:', response)

@@ -1,6 +1,7 @@
 # AWS Lambda Forwarder for API Gateway Test Environment
 
-This repository contains a simple AWS Lambda function written in Python, designed to be used in a test environment for AWS API Gateway and Lambda functions. The Lambda function acts as a message forwarder, accepting a query as input, sending the query to an external API, and returning the response back to the API Gateway.
+This project contains a Lambda function integrated with API Gateway to create a simple message forwarder with API-Key Authentication. The function takes a JSON input with a "query" field and forwards it to an external API endpoint. The external API will return a response in JSON format, which is then parsed and sent back to the requestor.
+
 
 ## Requirements
 
@@ -44,6 +45,20 @@ The API Gateway will be running at http://127.0.0.1:3000. You can now use tools 
 
 ## Deploy to AWS
 
+Make sure you have setup your aws enviroment. Use:
+
+```bash
+aws configure
+```
+
+if necessary. If it doesn't work, you may try to add the values for the following ENV variables manually:
+
+```bash
+$Env:AWS_ACCESS_KEY_ID
+$Env:AWS_SECRET_ACCESS_KEY
+$Env:AWS_SESSION_TOKEN
+```
+
 To deploy the Lambda function to AWS, follow these steps:
 
 Build the SAM application:
@@ -55,7 +70,8 @@ Deploy the application:
 ```bash
 sam deploy --guided
 ```
-Follow the prompts to configure the deployment settings, such as the AWS Region, stack name, and other parameters.
+Follow the prompts to configure the deployment settings, such as the AWS Region, stack name, and other parameters. The build will provide the path for the API key and created API endpoint in the output along with a short instruction on how to test.
+
 
 ## Usage
 
@@ -71,7 +87,5 @@ Example request:
 Example response:
 
 ```json
-{
-  "message": "Query received: value1"
-}
+{"message": "Query received: value1", "external_api_response": {"result": "This is the response from the external API", "other_key": "Some other data", "status": 200}}
 ```
